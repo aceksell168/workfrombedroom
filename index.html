@@ -2347,7 +2347,7 @@
         </div>
     </div>
 
-    <!-- ===== POPUP VALIDASI PER JAM (BARU) ===== -->
+    <!-- ===== POPUP VALIDASI PER JAM ===== -->
     <div class="popup-overlay" id="vhPopupOverlay">
         <div class="popup-box">
             <button class="popup-close" id="vhPopupClose">✕</button>
@@ -2358,7 +2358,7 @@
         </div>
     </div>
 
-    <!-- ===== POPUP CEK DIGIT (BARU) ===== -->
+    <!-- ===== POPUP CEK DIGIT ===== -->
     <div class="popup-overlay" id="digitPopupOverlay">
         <div class="popup-box">
             <button class="popup-close" id="digitPopupClose">✕</button>
@@ -2431,6 +2431,16 @@
             if (isNaN(num)) return raw;
 
             return 'Rp. ' + num.toLocaleString('en-US') + ',-';
+        }
+
+        // ============================================================
+        // UTILITY: FORMAT ANGKA RIBUAN (tanpa Rp)
+        // ============================================================
+        function formatAngkaRibuan(val) {
+            if (val === null || val === undefined || val === '') return '0';
+            const num = parseInt(String(val).replace(/[^\d]/g, ''), 10);
+            if (isNaN(num)) return '0';
+            return num.toLocaleString('en-US');
         }
 
         // ============================================================
@@ -2546,15 +2556,11 @@
                 overlay.classList.add('active');
             }
 
-            // Tutup via tombol X
             if (closeBtn) closeBtn.addEventListener('click', hide);
-            // Tutup via tombol OK
             if (okBtn) okBtn.addEventListener('click', hide);
-            // Tutup via klik overlay (luar kotak)
             overlay.addEventListener('click', function(e) {
                 if (e.target === overlay) hide();
             });
-            // Tutup via Escape
             document.addEventListener('keydown', function(e) {
                 if (e.key === 'Escape' && overlay.classList.contains('active')) hide();
             });
@@ -2562,13 +2568,8 @@
             return { show, hide, overlay };
         }
 
-        // Inisialisasi popup WD (yang sudah ada)
         const wdPopup = setupPopup('wdPopupOverlay', 'wdPopupClose', 'wdPopupBtn', '✅', 'Berhasil!');
-
-        // Inisialisasi popup Validasi Per Jam (BARU)
         const vhPopup = setupPopup('vhPopupOverlay', 'vhPopupClose', 'vhPopupBtn', '⚠️', 'Perhatian');
-
-        // Inisialisasi popup Cek Digit (BARU)
         const digitPopup = setupPopup('digitPopupOverlay', 'digitPopupClose', 'digitPopupBtn', '⚠️', 'Perhatian');
 
         // ============================================================
@@ -3348,8 +3349,10 @@
                 const brand = getSelectedBrand();
                 const smb = getSelectedSmb38();
 
-                let reportText = `Info : ${brand} - ${smb}\n`;
-                reportText += 'Perihal : Transaksi Withdraw Minera Pending\n\n';
+                // Format copy: Info / Perihal / Toko (baris terpisah)
+                let reportText = `Info : ${brand}\n`;
+                reportText += 'Perihal : Transaksi Withdraw Minera Pending\n';
+                reportText += `Toko : ${smb}\n\n`;
 
                 for (let t of transactions) {
                     const nominalFormatted = formatNominalKoma(t.nominal);
@@ -3497,6 +3500,7 @@
             setInterval(updateDateTimeVH, 1000);
             updateDateTimeVH();
 
+            // Parser: menangkap angka lengkap dengan koma (contoh: 4,100)
             function parseValidasiData(text) {
                 const lines = text.split(/\r?\n/).filter(l => l.trim() !== '');
                 let result = {
@@ -3509,41 +3513,43 @@
                 for (let i = 0; i < lines.length; i++) {
                     const line = lines[i].trim();
 
-                    let m1 = line.match(/Deposit\s+Total\s*[:\t]\s*([\d.,]+)\s*[:\t]?\s*(\d+)/i);
+                    // Format: Deposit Total:	28,026,640.00	4,100
+                    let m1 = line.match(/Deposit\s+Total\s*[:\t]\s*([\d.,]+)\s*[:\t]?\s*([\d.,]+)/i);
                     if (m1) {
-                        result.nominalDeposit = m1[1];
-                        result.memberDeposit = m1[2];
+                        result.nominalDeposit = m1[1].replace(/[^\d]/g, '');
+                        result.memberDeposit = m1[2].replace(/[^\d]/g, '');
                         continue;
                     }
 
-                    let m2 = line.match(/Withdraw\s+Total\s*[:\t]\s*([\d.,]+)\s*[:\t]?\s*(\d+)/i);
+                    // Format: Withdraw Total:	32,173,000.00	9,900
+                    let m2 = line.match(/Withdraw\s+Total\s*[:\t]\s*([\d.,]+)\s*[:\t]?\s*([\d.,]+)/i);
                     if (m2) {
-                        result.nominalWithdraw = m2[1];
-                        result.memberWithdraw = m2[2];
+                        result.nominalWithdraw = m2[1].replace(/[^\d]/g, '');
+                        result.memberWithdraw = m2[2].replace(/[^\d]/g, '');
                         continue;
                     }
 
-                    let m3 = line.match(/Total\s+Member\s+Yang\s+Deposit\s*[:\t]\s*(\d+)/i);
+                    let m3 = line.match(/Total\s+Member\s+Yang\s+Deposit\s*[:\t]\s*([\d.,]+)/i);
                     if (m3) {
-                        result.memberDeposit = m3[1];
+                        result.memberDeposit = m3[1].replace(/[^\d]/g, '');
                         continue;
                     }
 
                     let m4 = line.match(/Total\s+Nominal\s+Deposit\s*[:\t]\s*([\d.,]+)/i);
                     if (m4) {
-                        result.nominalDeposit = m4[1];
+                        result.nominalDeposit = m4[1].replace(/[^\d]/g, '');
                         continue;
                     }
 
-                    let m5 = line.match(/Total\s+Member\s+Yang\s+Withdraw\s*[:\t]\s*(\d+)/i);
+                    let m5 = line.match(/Total\s+Member\s+Yang\s+Withdraw\s*[:\t]\s*([\d.,]+)/i);
                     if (m5) {
-                        result.memberWithdraw = m5[1];
+                        result.memberWithdraw = m5[1].replace(/[^\d]/g, '');
                         continue;
                     }
 
                     let m6 = line.match(/Total\s+Nominal\s+Withdraw\s*[:\t]\s*([\d.,]+)/i);
                     if (m6) {
-                        result.nominalWithdraw = m6[1];
+                        result.nominalWithdraw = m6[1].replace(/[^\d]/g, '');
                         continue;
                     }
                 }
@@ -3562,10 +3568,11 @@
                     return;
                 }
 
-                const totalValidasi = vhInputValidasi.value.trim() || '0';
-                const totalAktif = vhInputAktif.value.trim() || '0';
-                const memberDeposit = data.memberDeposit || '0';
-                const memberWithdraw = data.memberWithdraw || '0';
+                // ✅ FORMAT ANGKA RIBUAN untuk member count
+                const totalValidasi = formatAngkaRibuan(vhInputValidasi.value.trim() || '0');
+                const totalAktif = formatAngkaRibuan(vhInputAktif.value.trim() || '0');
+                const memberDeposit = formatAngkaRibuan(data.memberDeposit || '0');
+                const memberWithdraw = formatAngkaRibuan(data.memberWithdraw || '0');
                 const nominalDeposit = formatNominalKoma(data.nominalDeposit);
                 const nominalWithdraw = formatNominalKoma(data.nominalWithdraw);
 
@@ -3605,7 +3612,6 @@
                 const totalAktif = vhInputAktif.value.trim();
 
                 if (!totalValidasi && !totalAktif) {
-                    // ✅ POPUP KUSTOM (bukan alert bawaan browser)
                     vhPopup.show('⚠️', 'Data Belum Lengkap', 'Isi minimal Total Validasi atau Total Member Aktif / Deposit terlebih dahulu!', 'popup-btn-warning');
                     return;
                 }
@@ -3667,14 +3673,13 @@
                 const totalAktif = vhInputAktif.value.trim();
 
                 if (!totalValidasi && !totalAktif) {
-                    // ✅ POPUP KUSTOM (bukan alert bawaan browser)
                     vhPopup.show('⚠️', 'Belum Ada Data', 'Isi input manual terlebih dahulu sebelum menyalin report.', 'popup-btn-warning');
                     return;
                 }
 
                 const brand = getSelectedBrand();
-                const memberDeposit = currentVHData ? (currentVHData.memberDeposit || '0') : '0';
-                const memberWithdraw = currentVHData ? (currentVHData.memberWithdraw || '0') : '0';
+                const memberDeposit = currentVHData ? formatAngkaRibuan(currentVHData.memberDeposit || '0') : '0';
+                const memberWithdraw = currentVHData ? formatAngkaRibuan(currentVHData.memberWithdraw || '0') : '0';
                 const nominalDeposit = currentVHData ? formatNominalKoma(currentVHData.nominalDeposit) : '—';
                 const nominalWithdraw = currentVHData ? formatNominalKoma(currentVHData.nominalWithdraw) : '—';
 
@@ -3686,8 +3691,8 @@
 ${dateStr}
 Pukul : ${timeStr} WIB
 
-Total Validasi : ${totalValidasi || '0'}
-Total Member Aktif / Deposit : ${totalAktif || '0'}
+Total Validasi : ${formatAngkaRibuan(totalValidasi || '0')}
+Total Member Aktif / Deposit : ${formatAngkaRibuan(totalAktif || '0')}
 
 Total Member Yang Deposit : ${memberDeposit}
 Total Nominal Deposit : ${nominalDeposit}
@@ -3725,7 +3730,6 @@ Total Nominal Withdraw : ${nominalWithdraw}`;
             const validasi = document.getElementById('digitValidasi').value.trim();
 
             if (!admin || !validasi) {
-                // ✅ POPUP KUSTOM (bukan alert bawaan browser)
                 digitPopup.show('⚠️', 'Data Belum Lengkap', 'Mohon isi kedua kolom terlebih dahulu!', 'popup-btn-warning');
                 return;
             }
@@ -3773,7 +3777,7 @@ Total Nominal Withdraw : ${nominalWithdraw}`;
             }, 2500);
         }
 
-        console.log('✅ Dashboard siap - Popup kustom untuk Validasi Per Jam & Cek Digit');
+        console.log('✅ Dashboard siap - WD format & VH parser diperbaiki');
     </script>
 
 </body>
