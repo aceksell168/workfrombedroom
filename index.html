@@ -3515,20 +3515,19 @@
 
                     // Format: Deposit Total:	28,026,640.00	4,100
                     let m1 = line.match(/Deposit\s+Total\s*[:\t]\s*([\d.,]+)\s*[:\t]?\s*([\d.,]+)/i);
-                    if (m1) {
-                        result.nominalDeposit = m1[1].replace(/[^\d]/g, '');
-                        result.memberDeposit = m1[2].replace(/[^\d]/g, '');
-                        continue;
-                    }
+if (m1) {
+    result.nominalDeposit = m1[1].replace(/\.\d+$/, '').replace(/[^\d]/g, '');  // buang .00 dulu, baru buang koma
+    result.memberDeposit = m1[2].replace(/[^\d]/g, '');
+    continue;
+}
 
-                    // Format: Withdraw Total:	32,173,000.00	9,900
-                    let m2 = line.match(/Withdraw\s+Total\s*[:\t]\s*([\d.,]+)\s*[:\t]?\s*([\d.,]+)/i);
-                    if (m2) {
-                        result.nominalWithdraw = m2[1].replace(/[^\d]/g, '');
-                        result.memberWithdraw = m2[2].replace(/[^\d]/g, '');
-                        continue;
-                    }
-
+// Format: Withdraw Total:	32,173,000.00	9,900
+let m2 = line.match(/Withdraw\s+Total\s*[:\t]\s*([\d.,]+)\s*[:\t]?\s*([\d.,]+)/i);
+if (m2) {
+    result.nominalWithdraw = m2[1].replace(/\.\d+$/, '').replace(/[^\d]/g, '');
+    result.memberWithdraw = m2[2].replace(/[^\d]/g, '');
+    continue;
+}
                     let m3 = line.match(/Total\s+Member\s+Yang\s+Deposit\s*[:\t]\s*([\d.,]+)/i);
                     if (m3) {
                         result.memberDeposit = m3[1].replace(/[^\d]/g, '');
@@ -3536,11 +3535,10 @@
                     }
 
                     let m4 = line.match(/Total\s+Nominal\s+Deposit\s*[:\t]\s*([\d.,]+)/i);
-                    if (m4) {
-                        result.nominalDeposit = m4[1].replace(/[^\d]/g, '');
-                        continue;
-                    }
-
+if (m4) {
+    result.nominalDeposit = m4[1].replace(/[^\d]/g, '');
+    continue;
+}
                     let m5 = line.match(/Total\s+Member\s+Yang\s+Withdraw\s*[:\t]\s*([\d.,]+)/i);
                     if (m5) {
                         result.memberWithdraw = m5[1].replace(/[^\d]/g, '');
