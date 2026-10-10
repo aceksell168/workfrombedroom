@@ -138,22 +138,6 @@
             color: #eaf3ff;
         }
 
-        .sidebar-brand-selector .smb-row {
-            display: flex;
-            gap: 8px;
-            align-items: center;
-        }
-
-        .sidebar-brand-selector .smb-row select {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
-        .sidebar-brand-selector .smb-row input {
-            flex: 1;
-            margin-bottom: 0;
-        }
-
         .sidebar-brand-selector .smb-hint {
             font-size: 0.6rem;
             color: #4a6a8a;
@@ -783,7 +767,7 @@
             color: #8effc4;
         }
 
-        /* ===== WD PENDING MINERAPAY ===== */
+        /* ===== WD PENDING P2M ===== */
         .wd-card {
             background: #111d33;
             border-radius: 24px;
@@ -2034,23 +2018,18 @@
                 <option value="Pesona805">Pesona805</option>
             </select>
 
-            <label>SMB38</label>
-            <div class="smb-row">
-                <select id="wdSmbSelect">
-                    <option value="SMB38">SMB38</option>
-                    <option value="SMB39">SMB39</option>
-                    <option value="SMB40">SMB40</option>
-                    <option value="custom">-- Ketik Manual --</option>
-                </select>
-                <input type="text" id="wdSmbManual" placeholder="Ketik..." style="display:none;">
-            </div>
-            <div class="smb-hint">Pilih brand & SMB38 untuk WD MineraPay</div>
+            <label>Toko</label>
+            <select id="wdTokoSelect">
+                <option value="P2M">P2M</option>
+                <option value="XPAY">XPAY</option>
+            </select>
+            <div class="smb-hint">Pilih brand & toko untuk WD</div>
         </div>
 
         <ul class="sidebar-menu">
             <li class="menu-label">Menu</li>
             <li><a href="#" class="active" data-page="page-reset"><span class="icon">🔑</span> Reset Password</a></li>
-            <li><a href="#" data-page="page-wd"><span class="icon">💳</span> Wd Pending MineraPay</a></li>
+            <li><a href="#" data-page="page-wd"><span class="icon">💳</span> Wd Pending P2M</a></li>
             <li><a href="#" data-page="page-validasi-jam"><span class="icon">📊</span> Validasi Per Jam</a></li>
             <li><a href="#" data-page="page-cek-digit"><span class="icon">🔍</span> Cek Kesamaan Digit</a></li>
         </ul>
@@ -2177,20 +2156,20 @@
             </div>
         </div>
 
-        <!-- ===== PAGE 2: WD PENDING MINERAPAY ===== -->
+        <!-- ===== PAGE 2: WD PENDING P2M ===== -->
         <div id="page-wd" class="page">
             <div class="wd-card">
                 <div class="wd-header">
                     <div class="wd-header-left">
                         <img src="https://cdn.areabermain.club/assets/cdn/az3/2025/10/14/20251014/7127b25e0a18569e6965c6ddb6660364/topanbos88.png" alt="Logo">
-                        <h1>💳 Wd Pending MineraPay <small id="wdBrandLabel">TopanBos88 - SMB38</small></h1>
+                        <h1>💳 Wd Pending <small id="wdBrandLabel">TopanBos88 - P2M</small></h1>
                     </div>
                     <span class="wd-report-meta" id="wdTimestampInfo">⏱️ </span>
                 </div>
 
                 <div class="wd-input-area">
                     <label for="wdRawData">📂 Copy Data Dari Admin</label>
-                    <textarea id="wdRawData" placeholder="Input Data WD MNP Pending Dari Admin PNG Disini..."></textarea>
+                    <textarea id="wdRawData" placeholder="Input Data WD Pending Dari Admin PNG Disini..."></textarea>
                     
                     <div class="wd-input-row">
                         <div class="wd-input-group">
@@ -2210,16 +2189,16 @@
 
                 <div class="wd-report-preview" id="wdReportContainer">
                     <div class="wd-report-header">
-                        <h2>📨 Report <small>Withdraw Minera Pending</small></h2>
+                        <h2>📨 Report <small id="wdReportSubtitle">Withdraw P2M Pending</small></h2>
                         <span class="wd-report-meta" id="wdTimestampInfo2">⏱️ </span>
                     </div>
                     <div id="wdReportBody">
                         <div class="wd-empty-state">🔍 Belum ada data. Tempel data dan klik Generate.</div>
                     </div>
                     <div id="wdKeteranganWrapper" style="display: none;">
-                        <div class="wd-keterangan-box">
-                            <strong>Keterangan :</strong> Untuk Saat Ini Terdapat Transaksi Pengiriman Dana Autowdminera Yang sedang dalam status pending ya ko/ci.<br>
-                            Untuk perihal ini akan di cek secara berkala dan menunggu keputusan final dari pihak Minerapay ya ko/ci.
+                        <div class="wd-keterangan-box" id="wdKeteranganBox">
+                            <strong>Keterangan :</strong> Untuk Saat Ini Terdapat Transaksi Pengiriman Dana Autowd Yang sedang dalam status pending ya ko/ci.<br>
+                            Untuk perihal ini akan di cek secara berkala dan menunggu keputusan final dari pihak P2M ya ko/ci.
                         </div>
                     </div>
                     <div class="wd-footer-tip" style="margin-top:16px;font-size:0.75rem;color:#5a7a9a;display:flex;justify-content:flex-end;letter-spacing:0.2px;">
@@ -2488,43 +2467,38 @@
         }
 
         // ============================================================
-        // BRAND & SMB38 SELECTOR
+        // BRAND & TOKO SELECTOR
         // ============================================================
         const wdBrandSelect = document.getElementById('wdBrandSelect');
-        const wdSmbSelect = document.getElementById('wdSmbSelect');
-        const wdSmbManual = document.getElementById('wdSmbManual');
+        const wdTokoSelect = document.getElementById('wdTokoSelect');
         const wdBrandLabel = document.getElementById('wdBrandLabel');
         const vhBrandLabel = document.getElementById('vhBrandLabel');
+        const wdReportSubtitle = document.getElementById('wdReportSubtitle');
+        const wdKeteranganBox = document.getElementById('wdKeteranganBox');
 
         function getSelectedBrand() {
             return wdBrandSelect.value;
         }
 
-        function getSelectedSmb38() {
-            if (wdSmbSelect.value === 'custom') {
-                return wdSmbManual.value.trim() || 'SMB38';
-            }
-            return wdSmbSelect.value;
+        function getSelectedToko() {
+            return wdTokoSelect.value;
         }
 
         function updateBrandLabel() {
             const brand = getSelectedBrand();
-            const smb = getSelectedSmb38();
-            wdBrandLabel.textContent = brand + ' - ' + smb;
+            const toko = getSelectedToko();
+            wdBrandLabel.textContent = brand + ' - ' + toko;
             vhBrandLabel.textContent = brand;
+            if (wdReportSubtitle) {
+                wdReportSubtitle.textContent = 'Withdraw ' + toko + ' Pending';
+            }
+            if (wdKeteranganBox) {
+                wdKeteranganBox.innerHTML = `<strong>Keterangan :</strong> Untuk Saat Ini Terdapat Transaksi Pengiriman Dana Autowd Yang sedang dalam status pending ya ko/ci.<br>
+                Untuk perihal ini akan di cek secara berkala dan menunggu keputusan final dari pihak ${toko} ya ko/ci.`;
+            }
         }
 
-        wdSmbSelect.addEventListener('change', function() {
-            if (this.value === 'custom') {
-                wdSmbManual.style.display = 'block';
-                wdSmbManual.focus();
-            } else {
-                wdSmbManual.style.display = 'none';
-            }
-            updateBrandLabel();
-        });
-
-        wdSmbManual.addEventListener('input', updateBrandLabel);
+        wdTokoSelect.addEventListener('change', updateBrandLabel);
         wdBrandSelect.addEventListener('change', updateBrandLabel);
 
         updateBrandLabel();
@@ -3152,7 +3126,7 @@
         })();
 
         // ============================================================
-        // WD PENDING MINERAPAY
+        // WD PENDING
         // ============================================================
         (function wdPendingScript() {
             const wdRawInput = document.getElementById('wdRawData');
@@ -3347,12 +3321,11 @@
                 }
 
                 const brand = getSelectedBrand();
-                const smb = getSelectedSmb38();
+                const toko = getSelectedToko();
 
-                // Format copy: Info / Perihal / Toko (baris terpisah)
+                // Format copy: Info / Perihal (tanpa Toko)
                 let reportText = `Info : ${brand}\n`;
-                reportText += 'Perihal : Transaksi Withdraw Minera Pending\n';
-                reportText += `Toko : ${smb}\n\n`;
+                reportText += `Perihal : Transaksi Withdraw ${toko} Pending\n\n`;
 
                 for (let t of transactions) {
                     const nominalFormatted = formatNominalKoma(t.nominal);
@@ -3368,8 +3341,8 @@
                     reportText += 'Lampiran : \n\n';
                 }
                 
-                reportText += 'Keterangan : Untuk Saat Ini Terdapat Transaksi Pengiriman Dana Autowdminera Yang sedang dalam status pending ya ko/ci.\n';
-                reportText += 'Untuk perihal ini akan di cek secara berkala dan menunggu keputusan final dari pihak Minerapay ya ko/ci.';
+                reportText += 'Keterangan : Untuk Saat Ini Terdapat Transaksi Pengiriman Dana Autowd Yang sedang dalam status pending ya ko/ci.\n';
+                reportText += `Untuk perihal ini akan di cek secara berkala dan menunggu keputusan final dari pihak ${toko} ya ko/ci.`;
 
                 navigator.clipboard.writeText(reportText).then(() => {
                     wdPopup.show('✅', 'Berhasil Disalin!', 'Report sudah berhasil Tercopy ke clipboard.', 'popup-btn-success');
@@ -3399,7 +3372,7 @@
             wdCopyBtn.addEventListener('click', copyWDReport);
 
             wdRawInput.value = '';
-            wdRawInput.placeholder = 'Input Data WD MNP Pending Dari Admin PNG Disini...';
+            wdRawInput.placeholder = 'Input Data WD Pending Dari Admin PNG Disini...';
         })();
 
         // ============================================================
@@ -3515,19 +3488,20 @@
 
                     // Format: Deposit Total:	28,026,640.00	4,100
                     let m1 = line.match(/Deposit\s+Total\s*[:\t]\s*([\d.,]+)\s*[:\t]?\s*([\d.,]+)/i);
-if (m1) {
-    result.nominalDeposit = m1[1].replace(/\.\d+$/, '').replace(/[^\d]/g, '');  // buang .00 dulu, baru buang koma
-    result.memberDeposit = m1[2].replace(/[^\d]/g, '');
-    continue;
-}
+                    if (m1) {
+                        result.nominalDeposit = m1[1].replace(/[^\d]/g, '');
+                        result.memberDeposit = m1[2].replace(/[^\d]/g, '');
+                        continue;
+                    }
 
-// Format: Withdraw Total:	32,173,000.00	9,900
-let m2 = line.match(/Withdraw\s+Total\s*[:\t]\s*([\d.,]+)\s*[:\t]?\s*([\d.,]+)/i);
-if (m2) {
-    result.nominalWithdraw = m2[1].replace(/\.\d+$/, '').replace(/[^\d]/g, '');
-    result.memberWithdraw = m2[2].replace(/[^\d]/g, '');
-    continue;
-}
+                    // Format: Withdraw Total:	32,173,000.00	9,900
+                    let m2 = line.match(/Withdraw\s+Total\s*[:\t]\s*([\d.,]+)\s*[:\t]?\s*([\d.,]+)/i);
+                    if (m2) {
+                        result.nominalWithdraw = m2[1].replace(/[^\d]/g, '');
+                        result.memberWithdraw = m2[2].replace(/[^\d]/g, '');
+                        continue;
+                    }
+
                     let m3 = line.match(/Total\s+Member\s+Yang\s+Deposit\s*[:\t]\s*([\d.,]+)/i);
                     if (m3) {
                         result.memberDeposit = m3[1].replace(/[^\d]/g, '');
@@ -3535,10 +3509,11 @@ if (m2) {
                     }
 
                     let m4 = line.match(/Total\s+Nominal\s+Deposit\s*[:\t]\s*([\d.,]+)/i);
-if (m4) {
-    result.nominalDeposit = m4[1].replace(/[^\d]/g, '');
-    continue;
-}
+                    if (m4) {
+                        result.nominalDeposit = m4[1].replace(/[^\d]/g, '');
+                        continue;
+                    }
+
                     let m5 = line.match(/Total\s+Member\s+Yang\s+Withdraw\s*[:\t]\s*([\d.,]+)/i);
                     if (m5) {
                         result.memberWithdraw = m5[1].replace(/[^\d]/g, '');
@@ -3566,7 +3541,7 @@ if (m4) {
                     return;
                 }
 
-                // ✅ FORMAT ANGKA RIBUAN untuk member count
+                // FORMAT ANGKA RIBUAN untuk member count
                 const totalValidasi = formatAngkaRibuan(vhInputValidasi.value.trim() || '0');
                 const totalAktif = formatAngkaRibuan(vhInputAktif.value.trim() || '0');
                 const memberDeposit = formatAngkaRibuan(data.memberDeposit || '0');
@@ -3775,7 +3750,7 @@ Total Nominal Withdraw : ${nominalWithdraw}`;
             }, 2500);
         }
 
-        console.log('✅ Dashboard siap - WD format & VH parser diperbaiki');
+        console.log('✅ Dashboard siap - Toko: P2M / XPAY');
     </script>
 
 </body>
